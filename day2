@@ -1,0 +1,25 @@
+DNS:
+dns domain name system is like a heirarchial system to help locate a particular ip
+web broswer has something called local cache if the user often visits for example google.com it connects direct if not
+the dns kicks in,
+the broswer connects with the recursive resolver (ill call rr) rr will ask the rootserver
+rootserver doesnt exactly know that ip of google.com but it know where to divert all the .com domains so it diverts rr to tdl top level domain each tdl has a list of subdomains they need to take care off for example .org .com or .edu
+this tdl will ask the rr to check the authoritative domain name server 
+where we can exactly find the domain resolution of the google
+and then brswer will communicated by the isp or rr the google ip and connection is established 
+and http resquest will send to load the google homepage
+            Root Nameservers (13 worldwide)
+                            ↓
+            TLD Nameservers (.com, .org, .edu, etc.)
+                            ↓
+            Authoritative Nameservers (for specific domains)
+                            ↓
+            Recursive Resolvers (your ISP, 8.8.8.8, 1.1.1.1)
+                            ↓
+                    Your Device
+
+PORTS:
+ports are logical endpoints where each device's service or application is identified
+well known(0-1023) registered (1024-49151) and others are dynamic ports that are assigned to the clients
+ports are not assigned by devices - instead by os/app based on service requirement,permission,availiablity!!
+some imp ports 80-http 443 -https 53 -dns etc
