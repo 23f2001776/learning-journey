@@ -1,0 +1,105 @@
+DEEP PACKET ANALYSIS
+  CLIENT                              SERVER
+
+State: CLOSED                       State: LISTEN
+                                    (Server listening on port 80)
+
+═══════════ STEP 1: SYN ════════════════════════════
+
+TCP Packet from Client:
+├── Flags: SYN (only)
+├── Sequence Number: x (e.g., 1000) ← Random, arbitrary
+├── Acknowledgment: 0 (not set in SYN)
+├── Window Size: 64KB (buffer space client can receive)
+├── MSS (Max Segment Size): 1460 bytes
+└── Options: Timestamps, SACK, Window Scaling
+
+Client State: SYN_SENT
+Client stores: seq_client = 1000
+
+                        Server receives
+                        ↓
+═══════════ STEP 2: SYN-ACK ════════════════════════
+
+TCP Packet from Server:
+├── Flags: SYN, ACK
+├── Sequence Number: y (e.g., 2000) ← Server's random seq
+├── Acknowledgment: x+1 (1001) ← "I received up to byte 1000"
+├── Window Size: 65535 (larger buffer)
+├── MSS: 1460
+└── Options: (same as client)
+
+Server State: SYN_RECEIVED
+Server stores: seq_server = 2000, ack_client = 1001
+
+Client receives
+                        ↓
+═══════════ STEP 3: ACK ════════════════════════════
+
+TCP Packet from Client:
+├── Flags: ACK (no SYN)
+├── Sequence Number: x+1 (1001) ← Continue from before
+├── Acknowledgment: y+1 (2001) ← "I received up to byte 2000"
+├── Window Size: 64KB
+└── (Can include data! First data packet)
+
+Client State: ESTABLISHED
+                        ↓
+                Server State: ESTABLISHED
+
+═══════════ CONNECTED & READY ══════════════════════
+
+NOW DATA FLOWS:
+Client sends: SEQ=1001, ACK=2001, DATA="GET / HTTP/1.1\r\n..."
+Server sends: SEQ=2001, ACK=1XXX, DATA="HTTP/1.1 200 OK\r\n..."
+
+TCP 3-Way Handshake (Deeper Dive)
+Why Handshake Exists
+Both sides need to:
+
+Synchronize sequence numbers (for reliable ordering)
+Advertise receive window (flow control)
+Confirm connection parameters (MSS, options)
+Establish state (both sides know connection exists)
+
+TIME_WAIT()
+Connection closes → Port 5000 released immediately
+New connection tries to use port 5000
+Old delayed packet arrives → confuses new connection
+Result: Data corruption, connection errors
+
+With TIME_WAIT (2×MSL = ~60 seconds):
+Ensures all old packets are gone before port reuse
+Port 5000 unusable for 60 seconds after close
+Old packets safely expire
+Safe to reopen port
+
+
+
+
+
+
+
+
+
+
+ARP WORKFLOW()
+Device A (192.168.1.100 / AA:AA:AA:AA:AA:AA)
+  ↓
+"WHO HAS 192.168.1.101? TELL 192.168.1.100"
+  ↓ (ARP Request - BROADCAST to everyone on LAN)
+  ↓
+Device B (192.168.1.101 / BB:BB:BB:BB:BB:BB) receives
+  ↓
+Device B responds: "I'm 192.168.1.101, my MAC is BB:BB:BB:BB:BB:BB"
+  ↓ (ARP Reply - UNICAST back to Device A)
+  ↓
+Device A caches: 192.168.1.101 → BB:BB:BB:BB:BB:BB
+  ↓
+Device A sends frame with:
+  Source MAC: AA:AA:AA:AA:AA:AA
+  Dest MAC: BB:BB:BB:BB:BB:BB
+  Source IP: 192.168.1.100
+  Dest IP: 192.168.1.101
+
+  
